@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Users</h1>
+    <div>
+        <input type="text" id="input-box" oninput="handleInput()" placeholder="Search for User...">
+        <input type="range" id="slider" min="0" max="20" value="10" oninput="handleInput()">
+      </div>
+    <ol id="olUsers"></ol>
+
+   
+
+    <script>
+        readUsers('',10)
+        async function handleInput() {
+            // Get the value of the input box
+            const inputBox = await document.getElementById("input-box");
+            const inputValue = inputBox.value;
+            console.log("Input Value:", inputValue);
+            // Do something with the input value
+            const slider = await document.getElementById("slider");
+            const sliderValue = slider.value;
+            console.log("Slider Value:", sliderValue);
+            await deleteOlUsers()
+            await readUsers(inputValue,sliderValue)
+        }
+
+        async function deleteOlUsers() {
+            
+            const olUsers = await document.getElementById("olUsers");
+            olUsers.innerHTML = ''
+            
+        }
+
+
+
+
+        async function readUsers(rawUser, amount) {
+            try{
+                const olUsers = document.getElementById("olUsers")
+                const result = await fetch(`http://localhost:8080/users?value=${encodeURIComponent(rawUser)}&number=${amount}`, {
+                    method: "GET",
+                    headers: {"content-type": "application/json"}
+                    });
+                    
+
+                //const result = await fetch("http://localhost:8080/users",{method:"GET"} )
+                const users = await result.json()
+                users.forEach(t => {
+
+                    //Create a list element
+                    const li = document.createElement("li")
+                    li.textContent = `${t.first_name} ${t.last_name}`
+                    li.id = t.username
+
+                    //Create a button element (Delete)
+                    const buttonD = document.createElement("button")
+                    buttonD.textContent = "Delete"
+                    buttonD.id = t.username
+
+                    // //Create a button element (Edit)
+                    // const buttonE = document.createElement("button")
+                    // buttonE.textContent = "Edit"
+                    // buttonD.id = t.username
+
+                    //Create a button element (Expand)
+                    const expand = document.createElement("button")
+                    expand.textContent = "expand data"
+                    expand.id = t.username
+
+                    expand.addEventListener("click", async e => {
+                        const div = document.createElement("div");
+                        div.id = `expand${t.username}`;
+
+                        const data = `
+                            Username: ${t.username}<br>
+                            Email: <input type="text" value="${t.email}" id="emailInput"><br>
+                            Admin: <input type="checkbox" ${t.is_admin ? "checked" : ""} id="adminInput"><br>
+                            First Name: <input type="text" value="${t.first_name}" id="firstNameInput"><br>
+                            Last Name: <input type="text" value="${t.last_name}" id="lastNameInput"><br>
+                            Telephone: <input type="text" value="${t.telephone}" id="telephoneInput"><br>
+                            Address: <input type="text" value="${t.address}" id="addressInput"><br>
+                            Create Date: ${t.create_date}<br>
+                            <button id="saveButton">Save</button>
+                        `;
+                        div.innerHTML = data;
+                        const existingDiv = document.getElementById(`expand${t.username}`);
+                        if (existingDiv) {
+                            existingDiv.remove(); // remove existing div if there is one
+                        }
+                        else{
+                            olUsers.appendChild(div);
+                        
+                        const saveButton = document.getElementById("saveButton");
+                        saveButton.addEventListener("click", async e => {
+                            const email = document.getElementById("emailInput").value;
+                            const isAdmin = document.getElementById("adminInput").checked;
+                            const firstName = document.getElementById("firstNameInput").value;
+                            const lastName = document.getElementById("lastNameInput").value;
+                            const telephone = document.getElementById("telephoneInput").value;
+                            const address = document.getElementById("addressInput").value;
+
+                            const edit = {
+                                email: email,
+                                is_admin: isAdmin,
+                                first_name: firstName,
+                                last_name: lastName,
+                                telephone: telephone,
+                                address: address
+                            };
+                            
+                            if(email !== t.email){
+                                const types = "editUser"
+                                    fetch("http://localhost:8080/users", {
+                                    method: "PATCH",
+                                    headers: {
+                                        "content-type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        ttype: types,
+                                        hash: t.hash,
+                                        value: "email",
+                                        newvalue: edit.email
+
+                                    })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data));
+                                    t.email = email
+                            }
+                            if(isAdmin !== t.is_admin){
+                                const types = "editUser"
+                                    fetch("http://localhost:8080/users", {
+                                    method: "PATCH",
+                                    headers: {
+                                        "content-type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        ttype: types,
+                                        hash: t.hash,
+                                        value: "is_admin",
+                                        newvalue: edit.is_admin
+
+                                    })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data));
+                                    t.is_admin = isAdmin
+                            }
+                            if(firstName !== t.first_name){
+                                const types = "editUser"
+                                    fetch("http://localhost:8080/users", {
+                                    method: "PATCH",
+                                    headers: {
+                                        "content-type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        ttype: types,
+                                        hash: t.hash,
+                                        value: "first_name",
+                                        newvalue: edit.first_name
+
+                                    })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data));
+                                    t.first_name = firstName
+                            }
+                            if(lastName !== t.last_name){
+                                const types = "editUser"
+                                    fetch("http://localhost:8080/users", {
+                                    method: "PATCH",
+                                    headers: {
+                                        "content-type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        ttype: types,
+                                        hash: t.hash,
+                                        value: "last_name",
+                                        newvalue: edit.last_name
+
+                                    })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data));
+                                    t.last_name = lastName
+                            }
+                            if(telephone !== t.telephone){
+                                const types = "editUser"
+                                    fetch("http://localhost:8080/users", {
+                                    method: "PATCH",
+                                    headers: {
+                                        "content-type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        ttype: types,
+                                        hash: t.hash,
+                                        value: "telephone",
+                                        newvalue: edit.telephone
+
+                                    })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data));
+                                    t.telephone = telephone
+                            }
+                            if(address !== t.address){
+                                const types = "editUser"
+                                    fetch("http://localhost:8080/users", {
+                                    method: "PATCH",
+                                    headers: {
+                                        "content-type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        ttype: types,
+                                        hash: t.hash,
+                                        value: "address",
+                                        newvalue: edit.address
+
+                                    })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data));
+                                    t.address = address
+                            }
+
+
+
+                            div.remove();
+                            
+                        });
+                        }
+                    });
+
+                    //Listen for a click on the delete button element
+                    buttonD.addEventListener("click", async e =>{
+                        const types = "removeUser"
+                        fetch("http://localhost:8080/users", {
+                        method: "DELETE",
+                        headers: {
+                            "content-type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            ttype: types,
+                            value: t.username
+                        })
+                        })
+                        .then(response => response.json())
+                        .then(data => console.log(data));
+                        //deletes the selected button and list
+                        a = document.querySelectorAll("li#andrewcrate, button#andrewcrate")
+                        a.forEach(o => o.remove())
+                    })
+
+                    //Listen for a click on the edit button
+
+                    
+
+                    //Add the list and button element
+                    olUsers.appendChild(li)
+                    olUsers.appendChild(buttonD)
+                    //olUsers.appendChild(buttonE)
+                    olUsers.appendChild(expand)
+
+                });
+            }
+            catch(e){
+                console.log(`Error reading users ${e}`)
+            }
+        }
+    </script>
+</body>
+</html>

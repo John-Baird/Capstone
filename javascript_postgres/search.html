@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input>
+    <script>
+        readUsers()
+
+        async function editUser() {
+
+            try{
+
+            }
+            catch(e){
+                console.log(`Error trying to edit user ${e}`)
+            }
+        }
+
+
+        async function readUsers() {
+            try{
+                const olUsers = document.getElementById("olUsers")
+                const result = await fetch("http://localhost:8080/users",{method:"GET"} )
+                const users = await result.json()
+                users.forEach(t => {
+
+                    //Create a list element
+                    const li = document.createElement("li")
+                    li.textContent = `${t.first_name} ${t.last_name}`
+                    li.id = t.username
+
+                    olUsers.appendChild(li)
+                    });
+                
+            }
+            catch(e){
+                console.log(`Error reading users ${e}`)
+            }
+        }
+    </script>
+</body>
+</html>

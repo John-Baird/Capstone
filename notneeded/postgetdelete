@@ -1,0 +1,54 @@
+const andrewcrate = ["andrewcrate", 'andrewcrate@example.com', 'ea17c66e-b97a-11ed-afa1-0242ac120002', false, "Andrew", "Crate", "8015551358", '890 Pine St.', "2020-01-01"]
+
+fetch("http://localhost:8080/users", {
+  method: "POST",
+  headers: {
+    "content-type": "application/json"
+  },
+  body: JSON.stringify({
+    users: andrewcrate
+  })
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+
+
+
+fetch("http://localhost:8080/users", {method: "GET"}).then(a=>a.json()).then(console.log)
+
+
+
+
+
+app.post("/users", async (req, res) => {
+    let result = {}
+    try
+    {
+        const reqJson = req.body
+        if(reqJson.type === "insertUser"){
+            await insertUser(reqJson.value)
+            result.success = true
+        }
+        else if(reqJson.type === "removeUser"){
+            await removeUser(reqJson.value)
+            result.success = true
+        }
+        else{
+            result.success = false
+        }
+        
+        
+    }
+    catch(e)
+    {
+        console.log(`Something happened when sending a response to port 8080: ${e}`)
+        result.success = false
+    }
+    finally
+    {
+        res.setHeader("content-type", "application/json")
+        res.send(JSON.stringify(result))
+    }
+    
+})
